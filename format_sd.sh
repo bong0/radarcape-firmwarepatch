@@ -41,4 +41,20 @@ echo CYLINDERS - $CYLINDERS
 	echo 96,,,-
 } | sfdisk -D -H 32 -S 32 -C $CYLINDERS $DRIVE
 mkfs.vfat -n "u-boot" ${DRIVE_P}1
-mkfs.ext4 -L "rootfs" ${DRIVE_P}2
+
+tempmount=$(mktemp -d)
+mount ${DRIVE_P}2 $tempmount >/dev/null
+if [ $? -eq 0 ]; then
+	echo "Found root partition already formatted. Just erasing its contents..."
+	cd $tempmount
+	# sanity check
+	echo $tempmount | grep -o 'tmp' >/dev/null
+	if [ $? -ne 0 ]; then
+		echo "This looks suspicious. The generated tempfolder for mounting should contain the word 'tmp' at least... Quitting."
+		exit 1
+	fi
+	rm -rf $tempmount/*
+else 
+	mkfs.ext4 -L "rootfs" ${DRIVE_P}2
+fi
+rmdir $tempmount

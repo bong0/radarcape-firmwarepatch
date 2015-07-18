@@ -36,8 +36,6 @@ trap 'error ${LINENO}' ERR
 
 trap cleanup SIGINT SIGTERM # register trap for unusual quits
 
-
-
 if [ ! -b "/dev/$DRIVE" ] ; then
 	echo Couldn\'t find \'${DRIVE}\'. You must specify a valid block device.
 	exit
@@ -47,6 +45,28 @@ if [ "$DRIVE" = "sda" ] ; then
 	echo You probably don\'t want to use /dev/sda...
 	exit
 fi
+
+# checks for required tools
+reqs_passed=1
+which mke2fs >/dev/null
+if [ $? -ne 0 ]; then echo "Please install mke2fs (e2fsprogs)";reqs_passed=0; fi
+which mkfs.ext4 >/dev/null
+if [ $? -ne 0 ]; then echo "Please install mkfs.ext4";reqs_passed=0; fi
+which mkfs.vfat >/dev/null
+if [ $? -ne 0 ]; then echo "Please install mkfs.vfat (dosfstools)";reqs_passed=0; fi
+which xz >/dev/null
+if [ $? -ne 0 ]; then echo "Please install xz";reqs_passed=0; fi
+which bc >/dev/null
+if [ $? -ne 0 ]; then echo "Please install bc";reqs_passed=0; fi
+which sfdisk >/dev/null
+if [ $? -ne 0 ]; then echo "Please install sfdisk";reqs_passed=0; fi
+which fdisk >/dev/null
+if [ $? -ne 0 ]; then echo "Please install fdisk";reqs_passed=0; fi
+which awk >/dev/null
+if [ $? -ne 0 ]; then echo "Please install awk";reqs_passed=0; fi
+
+if [ $reqs_passed -ne 1 ]; then exit 1; fi
+
 
 if echo ${DRIVE} | grep "mmcblk" ; then
 	DRIVE_P="${DRIVE}p"
@@ -61,9 +81,6 @@ echo "Please enter your desired hostname. Mostly this is present on a sticker on
 echo "For example, rc11"
 read MY_HOSTNAME
 
-rm -rf format_sd.sh
-wget http://www.modesbeast.com/resources/format_sd.sh
-sync
 if [ ! -f format_sd.sh ]; then
         echo "Cannot find format_sd.sh"
         exit 1
