@@ -54,6 +54,8 @@ if [ $? -eq 0 ]; then
 		exit 1
 	fi
 	rm -rf $tempmount/*
+	cd ..
+	umount $tempmount
 else 
 	mkfs.ext4 -L "rootfs" ${DRIVE_P}2
 fi

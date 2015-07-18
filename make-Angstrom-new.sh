@@ -3,6 +3,15 @@
 set -x
 # set -e
 
+# Component URLS
+MLO_BEAGLEBONE=/tmp/mlo_beaglebone
+wget http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/MLO-beaglebone-2014.07 -O $MLO_BEAGLEBONE
+UBOOT_BEAGLEBONE_IMG=/tmp/u-boot-beaglebone.img
+wget http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/u-boot-beaglebone.img -O $UBOOT_BEAGLEBONE_IMG
+echo "Downloading rootfs"
+wget -nv http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/Angstrom-systemd-image-glibc-ipk-v2015.07-beaglebone.rootfs.tar.xz -O /tmp/rootfs.tar.xz
+
+
 DRIVE=$1
 
 uid=$(id -u)
@@ -19,6 +28,9 @@ function cleanup(){
 	#rm -rf $BUILD
 	umount $tmpmount_1 $tmpmount_2 || true
 	rmdir $tmpmount_1 $tmpmount_2
+	rm -f $MLO_BEAGLEBONE
+	rm -f $UBOOT_BEAGLEBONE_IMG
+	rm -f /tmp/rootfs.tar.xz
 }
 function error(){
 	local parent_lineno="$1"
@@ -95,21 +107,21 @@ sudo umount /dev/${DRIVE_P}2 || true
 sudo mount /dev/${DRIVE_P}1 $tmpmount_1
 sudo mount /dev/${DRIVE_P}2 $tmpmount_2
 
-sudo cp -v MLO-beaglebone-2013.04-2013.05.20 $tmpmount_1/MLO
+sudo cp -v $MLO_BEAGLEBONE $tmpmount_1/MLO
 
-sudo cp -v u-boot-beaglebone-2013.04-dirty.img $tmpmount_1/u-boot.img
+sudo cp -v $UBOOT_BEAGLEBONE_IMG $tmpmount_1/u-boot.img
 
 # image on local system sudo tar xf Angstrom-systemd-image-eglibc-ipk-v2012.12-beaglebone.rootfs.tar.xz -C /media/${DRIVE_P}2
 
-rm -f /tmp/rootfs.tar.xz
-wget http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/Angstrom-systemd-image-glibc-ipk-v2015.07-beaglebone.rootfs.tar.gz \
--O /tmp/rootfs.tar.xz
-xz -d /tmp/rootfs.tar.xz
-tar xf /tmp/rootfs.tar -C $tmpmount_2/
+echo "Extracting rootfs"
+tar xJf /tmp/rootfs.tar.xz -C $tmpmount_2/
 
 
 echo "The new SD card will be accessible via network with the hostname ${MY_HOSTNAME}"
 echo $MY_HOSTNAME > $tmpmount_2/etc/hostname
 
+echo "Umounting and syncing file systems. This can take a while..."
 sudo umount /dev/${DRIVE_P}1
 sudo umount /dev/${DRIVE_P}2
+
+cleanup
