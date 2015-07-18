@@ -1,5 +1,5 @@
 #!/bin/sh
-
+set -e
 # Format an SD card for use on a BeagleBone / CALC
 #
 # Assumes erase block size is a multiple of 1.5, 2, 3, 4, 6, or 8 MiB.  For
@@ -10,6 +10,7 @@
 # mmcblk0p2 "rootfs" start @ 48 MiB, size = rest, ext4
 
 DRIVE=$1
+ERASE=$2
 
 if [ ! -b "$DRIVE" ] ; then
 	echo Couldn\'t find ${DRIVE}. You must specify a valid block device.
@@ -36,11 +37,25 @@ echo DISK SIZE - $SIZE bytes
 # Each cylinder is 0.5 MiB
 CYLINDERS=`echo $SIZE/32/32/512 | bc`
 echo CYLINDERS - $CYLINDERS
-{
-	echo 48,48,0x0C,*
-	echo 96,,,-
-} | sfdisk -D -H 32 -S 32 -C $CYLINDERS $DRIVE
-mkfs.vfat -n "u-boot" ${DRIVE_P}1
+
+sfdisk -D -H 32 -S 32 -C $CYLINDERS $DRIVE <<EOF
+1,48,0xE,*
+,,,-
+EOF
+kpartx -av $DRIVE # update partition devices in /dev
+
+#48,48,0x0C,*
+#96,,,-
+#EOF
+
+
+if [[ $ERASE != "ERASE" ]]; then
+	echo "NOTICE: Skipping erase since you did not request it (second parameter was not 'ERASE')"
+	exit 0
+fi
+
+
+mkfs.vfat -F 16 -n "u-boot" ${DRIVE_P}1
 
 tempmount=$(mktemp -d)
 mount ${DRIVE_P}2 $tempmount >/dev/null

@@ -5,11 +5,10 @@ set -x
 
 # Component URLS
 MLO_BEAGLEBONE=/tmp/mlo_beaglebone
-wget http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/MLO-beaglebone-2014.07 -O $MLO_BEAGLEBONE
+MLO_BEAGLEBONE_URL=http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/MLO-beaglebone-2014.07
+
 UBOOT_BEAGLEBONE_IMG=/tmp/u-boot-beaglebone.img
-wget http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/u-boot-beaglebone.img -O $UBOOT_BEAGLEBONE_IMG
-echo "Downloading rootfs"
-wget -nv http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/Angstrom-systemd-image-glibc-ipk-v2015.07-beaglebone.rootfs.tar.xz -O /tmp/rootfs.tar.xz
+UBOOT_BEAGLEBONE_IMG_URL=http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/u-boot-beaglebone.img
 
 
 DRIVE=$1
@@ -76,6 +75,8 @@ which fdisk >/dev/null
 if [ $? -ne 0 ]; then echo "Please install fdisk";reqs_passed=0; fi
 which awk >/dev/null
 if [ $? -ne 0 ]; then echo "Please install awk";reqs_passed=0; fi
+which kpartx >/dev/null
+if [ $? -ne 0 ]; then echo "Please install kpartx";reqs_passed=0; fi
 
 if [ $reqs_passed -ne 1 ]; then exit 1; fi
 
@@ -98,7 +99,14 @@ if [ ! -f format_sd.sh ]; then
         exit 1
 fi
 
-sudo bash ./format_sd.sh /dev/$DRIVE
+# Download resources
+wget $MLO_BEAGLEBONE_URL -O $MLO_BEAGLEBONE
+wget $UBOOT_BEAGLEBONE_IMG_URL -O $UBOOT_BEAGLEBONE_IMG
+echo "Downloading rootfs"
+wget -nv http://dominion.thruhere.net/angstrom/nightlies/v2015.12/beaglebone/Angstrom-systemd-image-glibc-ipk-v2015.07-beaglebone.rootfs.tar.xz -O /tmp/rootfs.tar.xz
+
+# format SDcard
+sudo bash ./format_sd.sh /dev/$DRIVE ERASE
 
 
 sudo umount /dev/${DRIVE_P}1 || true # fake exit status because we only try
