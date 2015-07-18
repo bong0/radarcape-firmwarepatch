@@ -9,17 +9,23 @@ cd $tmpdir
 
 wget -N http://www.modesbeast.com/resources/radarcaped-${latestRelease}.opk
 
+origOpkName=*.opk
 mkdir opkunpack
 cd opkunpack
 ar -x ../*.opk
 
 # patch the control scripts
-tar xzf control.tar.gz
+mkdir unpack
+tar xzf control.tar.gz -C unpack
+cd unpack
 sed -i 's|/home/root|/root|g' postinst
+sed -i 's|/home/root|/root|g' postinst.bak
 sed -i 's|/home/root|/root|g' preinst
+sed -i 's|/home/root|/root|g' preinst.bak
 sed -i 's|/home/root|/root|g' postrm
-tar czf control.tar.gz postinst postrm  preinst  prerm  # leave out the .bak files...
-rm postinst  postinst.bak  postrm  preinst  preinst.bak  prerm
+cd ..
+tar czf control.tar.gz -C unpack
+rm -rf unpack
 
 # patch the application
 mkdir unpack
@@ -29,7 +35,7 @@ sed -i 's|/home/root|/root|g' home/root/cape.sh
 sed -i 's|/home/root|/root|g' lib/systemd/system/adsb.service
 cd ..
 tar czf data.tar.gz -C unpack  # leave out the .bak files...
-rm -r unpack
+rm -rf unpack
 
 cd ..
 ar -rcs *.opk opkunpack/*

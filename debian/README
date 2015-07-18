@@ -18,6 +18,5 @@ apt-get update; apt-get install libsqlite0
 RADARCAPE_DIR=/home/root in preinst und postinst script muss auf /root geändert werden
 
 ***
-opkg-static install....
-
+opkg-static install .... --force-depends 
 
