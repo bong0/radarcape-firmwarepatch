@@ -23,8 +23,8 @@ sed -i 's|/home/root|/root|g' postinst.bak
 sed -i 's|/home/root|/root|g' preinst
 sed -i 's|/home/root|/root|g' preinst.bak
 sed -i 's|/home/root|/root|g' postrm
+tar czf ../control.tar.gz *
 cd ..
-tar czf control.tar.gz -C unpack
 rm -rf unpack
 
 # patch the application

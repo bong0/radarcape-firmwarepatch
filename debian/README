@@ -12,11 +12,21 @@ opkg has hardcoded strings to overlayfs, those need to be symliked: script: syml
 
 Installieren der radarcape software:
 
-apt-get update; apt-get install libsqlite0
+apt-get update; apt-get -y install libsqlite0 connman
 
 *** opkg muss gepatcht werden ***
 RADARCAPE_DIR=/home/root in preinst und postinst script muss auf /root geändert werden
 
 ***
 opkg-static install .... --force-depends 
+
+
+Watchdog disable für development:
+
+echo 60 > /sys/class/gpio/export
+echo out > /sys/class/gpio/gpio60/direction
+echo 1 > /sys/class/gpio/gpio60/value
+echo 0 > /sys/class/gpio/gpio60/value
+(while `true`; do echo 1 > /sys/class/gpio/gpio60/value; echo 0 > /sys/class/gpio/gpio60/value; sleep 30; done)&
+
 
