@@ -33,11 +33,13 @@ tar xzf data.tar.gz -C unpack
 cd unpack
 sed -i 's|/home/root|/root|g' home/root/cape.sh
 sed -i 's|/home/root|/root|g' lib/systemd/system/adsb.service
+mv home/root .  #realign root's home
+rmdir home #delete now empty dir
+tar czf ../data.tar.gz *
 cd ..
-tar czf data.tar.gz -C unpack  # leave out the .bak files...
 rm -rf unpack
 
 cd ..
 ar -rcs *.opk opkunpack/*
 mv *.opk $destDir
-# rm -rf $tmpdir
+rm -rf $tmpdir
