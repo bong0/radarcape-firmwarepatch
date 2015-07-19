@@ -12,6 +12,7 @@
 * opkg has hardcoded strings to overlayfs, those need to be symliked: script: symlink_opkg_dirs.sh
 
 * Auto-trigger (~disable) watchdog for development **YOU WANT TO DO THIS NOW, else our bit apt-get will never finish**
+```
 cat <<EOF
 
 echo 60 > /sys/class/gpio/export
@@ -20,6 +21,7 @@ echo 1 > /sys/class/gpio/gpio60/value
 echo 0 > /sys/class/gpio/gpio60/value
 (while `true`; do echo 1 > /sys/class/gpio/gpio60/value; echo 0 > /sys/class/gpio/gpio60/value; sleep 30; done)&
 EOF > /etc/rc.local
+```
 
 * Installation of the radarcape software:
 * Dependencies `apt-get update; apt-get -y install libsqlite0 connman psmisc`
@@ -31,7 +33,8 @@ EOF > /etc/rc.local
   * `opkg-static install *.opk --force-depends`
 
 * beaglebone dts-overlay installation: (this also adds the missing files in /lib/firmware, e.g. BB-UART5 and BB-UART2)
-```cd /tmp
+```
+cd /tmp
 git clone https://github.com/beagleboard/bb.org-overlays.git
 cd bb.org-overlays
 ./dtc-overlay.sh
