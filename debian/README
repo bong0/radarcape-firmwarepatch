@@ -30,3 +30,14 @@ echo 0 > /sys/class/gpio/gpio60/value
 (while `true`; do echo 1 > /sys/class/gpio/gpio60/value; echo 0 > /sys/class/gpio/gpio60/value; sleep 30; done)&
 
 
+beaglebone dts-overlay installieren: (die restlichen files die in /lib/firmware gehören. u.a. BB-UART5 und BB-UART2)
+cd /tmp
+git clone https://github.com/beagleboard/bb.org-overlays.git
+cd bb.org-overlays
+./dtc-overlay.sh
+./install.sh
+cd ..
+rm -rf bb.org-overlays
+
+dtc -O dtb -o BB-B-Radarcape-00A0.dtbo -b 0 -@ BB-B-Radarcape.dts # recompile dts file for the new dtc version!
+reboot

@@ -1,0 +1,48 @@
+#!/bin/bash
+
+set -x
+
+chown root:root /root
+chmod 700 /root
+cd /root
+
+BOARD=$(dmesg | grep -oE 'compatible-baseboard=[a-zA-Z,-]*' | cut -d',' -f2)
+SLOTS=$(find /sys/devices -name slots)
+
+BBUART5STATE=`grep BB-UART5 $SLOTS | wc -l`
+BBUART2STATE=`grep BB-UART2 $SLOTS | wc -l`
+BBRadarcapeSTATE=`grep BB-.-Radarcape $SLOTS | wc -l`
+
+if [ $BBUART5STATE -eq 0 ]; then 
+  echo BB-UART5 > $SLOTS
+fi
+
+if [ $BBUART2STATE -eq 0 ]; then
+  echo BB-UART2 > $SLOTS
+fi
+
+### load the Radarcape device tree and program FPGA ###
+
+if [ $BBRadarcapeSTATE -eq 0 ]; then
+
+  if [[ $BOARD == beaglebone ]]; then
+    echo BB-W-Radarcape > ${SLOTS}
+    cat $SLOTS
+    ./MB_ARM_FAST_DT meaADSB.rbf
+
+  elif [[ $BOARD == beaglebone-black ]]; then
+    echo BB-B-Radarcape > ${SLOTS}
+    cat $SLOTS
+    ./MB_ARM_FAST_BBB meaADSB.rbf
+
+  else
+    echo "Not supported board $BOARD"
+    exit 1
+
+  fi
+
+fi
+
+### Start radarcape application ###
+
+nohup ./rcd > /dev/null 2> /root/rcd-err.log &
