@@ -1,4 +1,11 @@
 # Radarcape on beagleboard.org debian (jessie) 8.1 beaglebone-black
+# README BEFORE YOU CONTINUE
+
+The developer of the radarcape - Guenter Koellner is developing and testing the platform with debian and current kernel versions (4.1.x - 2015-07). Stability discussions happen here https://groups.google.com/forum/#!forum/beagleboard 
+There are as of 2015-07-20 unreleased .deb packages, so there is no strict need for the procedure below if you can wait.
+
+Debian needs a statically linked version (300k) of the MB_ARM_FAST_BBB tool which programs the FPGA, which is also not included in the opkg package designed for Angström!
+
 # The procedure
 
 * Flash full SD-Image from beagleboard.org (kernel >=4.1.1, console)
@@ -24,8 +31,9 @@ EOF > /etc/rc.local
 ```
 
 * Installation of the radarcape software:
-* Dependencies `apt-get update; apt-get -y install libsqlite0 connman psmisc`
-
+* Dependencies and adjustments `apt-get update; apt-get -y install libsqlite0 connman psmisc dnsmasq; apt-get purge udhcpd`
+    * udhcpcd is purged for dnsmasq since the latter does not assign buggy leases to a non-existing mac-addr thus blocking the only free IP in the /30 net
+ 
 * **opkg file from the modesbeast wiki page has to be patched!**
   * RADARCAPE_DIR=/home/root in preinst und postinst script has to be changed to /root => see patchscript
   * `download_and_patch_opkg.sh`
